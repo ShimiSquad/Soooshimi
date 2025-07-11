@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>soooshimi</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&family=VT323&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Space Grotesk', 'VT323', monospace, sans-serif;
+            background: #0a0a0a url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat fixed;
+            color: #f5f5f5;
+            overflow-x: hidden;
+            line-height: 1.4;
+            min-height: 100vh;
+        }
+        /* Urban overlay textures */
+        .urban-overlay {
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            opacity: 0.18;
+            mix-blend-mode: multiply;
+        }
+        /* Glitch effect */
+        .glitch {
+            position: relative;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            text-transform: lowercase;
+            animation: glitch-skew 2s infinite linear alternate-reverse;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+        .glitch::before {
+            color: #ff005a;
+            z-index: 2;
+            clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            color: #00fff9;
+            z-index: 1;
+            clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+            animation: glitch-anim2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { transform: translate(0,0); }
+            20% { transform: translate(-2px,2px); }
+            40% { transform: translate(-5px,-2px); }
+            60% { transform: translate(2px,2px); }
+            80% { transform: translate(-1px,-1px); }
+            100% { transform: translate(0,0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { transform: translate(0,0); }
+            20% { transform: translate(2px,-2px); }
+            40% { transform: translate(5px,2px); }
+            60% { transform: translate(-2px,-2px); }
+            80% { transform: translate(1px,1px); }
+            100% { transform: translate(0,0); }
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            10% { transform: skew(2deg, -2deg); }
+            20% { transform: skew(-2deg, 2deg); }
+            30% { transform: skew(1deg, -1deg); }
+            40% { transform: skew(-1deg, 1deg); }
+            100% { transform: skew(0deg); }
+        }
+        /* Scanlines */
+        .scanlines {
+            pointer-events: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.03) 0px,
+                rgba(255,255,255,0.03) 1px,
+                transparent 2px,
+                transparent 6px
+            );
+            mix-blend-mode: overlay;
+        }
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.2rem 2rem;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.92);
+            border-bottom: 1.5px solid #222;
+            box-shadow: 0 2px 16px 0 #000a;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-family: 'VT323', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff005a;
+            text-shadow: 0 0 8px #ff005a88, 0 0 2px #fff;
+            letter-spacing: 2px;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .logo:hover {
+            color: #00fff9;
+            text-shadow: 0 0 12px #00fff988, 0 0 2px #fff;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #f5f5f5;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            position: relative;
+            text-transform: lowercase;
+            letter-spacing: 1px;
+            padding: 0.2em 0.5em;
+        }
+        .nav-links a:hover {
+            color: #ff005a;
+            background: #fff2;
+            border-radius: 4px;
+        }
+        /* Main Content */
+        main {
+            min-height: 100vh;
+            padding-top: 6.5rem;
+            z-index: 2;
+            position: relative;
+        }
+        .content-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            animation: fadeInUp 0.7s cubic-bezier(.77,0,.18,1) 1;
+            background: rgba(20,20,20,0.85);
+            border-radius: 18px;
+            box-shadow: 0 4px 32px 0 #000b;
+            border: 1.5px solid #222;
+        }
+        .content-section.active {
+            display: block;
+        }
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 5rem 2rem 3rem 2rem;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+        .hero h1 {
+            margin-bottom: 1.5rem;
+        }
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: #ff005a;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            font-weight: 400;
+            line-height: 1.6;
+            text-shadow: 0 0 8px #ff005a44;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.7rem;
+            font-family: 'VT323', monospace;
+            font-weight: 700;
+            color: #00fff9;
+            display: block;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 8px #00fff988;
+        }
+        .stat-label {
+            font-size: 1rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        /* Section Titles */
+        .section-title {
+            font-family: 'VT323', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff005a;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px #ff005a88;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00fff9, transparent);
+        }
+        /* About Section */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 2rem;
+        }
+        .about-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #f5f5f5;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+        .about-image {
+            aspect-ratio: 4/5;
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 24px #000a;
+        }
+        .about-image::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 0, 90, 0.08), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        .about-image span {
+            z-index: 2;
+            background: rgba(0,0,0,0.5);
+            padding: 0.7em 1.2em;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        /* Sound Section */
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .sound-card {
+            background: linear-gradient(135deg, rgba(255, 0, 90, 0.08), rgba(0, 255, 249, 0.04));
+            border: 1.5px solid #333;
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(.77,0,.18,1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 16px #000a;
+        }
+        .sound-card:hover {
+            transform: translateY(-5px) scale(1.03) rotate(-1deg);
+            border-color: #ff005a;
+            box-shadow: 0 4px 32px #ff005a33;
+        }
+        .sound-title {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: #00fff9;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        .sound-description {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .waveform-container {
+            height: 60px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: end;
+            gap: 2px;
+            margin-bottom: 1rem;
+        }
+        .wave-bar {
+            flex: 1;
+            background: linear-gradient(to top, #ff005a, #00fff9);
+            border-radius: 1px;
+            transition: all 0.3s;
+            min-height: 5px;
+        }
+        .sound-card:hover .wave-bar {
+            background: linear-gradient(to top, #fff, #ff005a);
+            animation: waveAnimation 1s infinite alternate;
+        }
+        @keyframes waveAnimation {
+            0% { transform: scaleY(1); }
+            100% { transform: scaleY(1.3); }
+        }
+        .play-button {
+            background: none;
+            border: 1.5px solid #ff005a;
+            color: #ff005a;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .play-button:hover {
+            background: #ff005a;
+            color: #fff;
+            border-color: #00fff9;
+        }
+        /* Visuals Section */
+        .visuals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .visual-card {
+            aspect-ratio: 16/10;
+            background: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80') center/cover no-repeat;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s;
+            border: 1.5px solid #333;
+            box-shadow: 0 2px 16px #000a;
+        }
+        .visual-card:nth-child(2) {
+            background-image: url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=600&q=80');
+        }
+        .visual-card:nth-child(3) {
+            background-image: url('https://images.unsplash.com/photo-1465101178521-c1a9136a3c5a?auto=format&fit=crop&w=600&q=80');
+        }
+        .visual-card:nth-child(4) {
+            background-image: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80');
+        }
+        .visual-card:nth-child(5) {
+            background-image: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80');
+        }
+        .visual-card:nth-child(6) {
+            background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80');
+        }
+        .visual-card:hover {
+            transform: scale(1.04) rotate(-1deg);
+            border-color: #00fff9;
+            box-shadow: 0 4px 32px #00fff933;
+        }
+        .visual-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+            padding: 1.5rem;
+            color: #fff;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        .visual-card:hover .visual-overlay {
+            transform: translateY(0);
+        }
+        .visual-title {
+            font-size: 1.2rem;
+            font-family: 'VT323', monospace;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ff005a;
+        }
+        .visual-description {
+            font-size: 1rem;
+            color: #ccc;
+        }
+        /* Echoes Section */
+        .echoes-container {
+            max-width: 800px;
+            margin: 3rem auto 0;
+        }
+        .echo-item {
+            background: linear-gradient(135deg, rgba(255, 0, 90, 0.08), rgba(0, 255, 249, 0.04));
+            border: 1.5px solid #333;
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            transition: all 0.4s;
+            box-shadow: 0 2px 16px #000a;
+        }
+        .echo-item:hover {
+            transform: translateY(-3px) scale(1.01);
+            border-color: #ff005a;
+            box-shadow: 0 4px 32px #ff005a33;
+        }
+        .echo-date {
+            font-size: 0.95rem;
+            color: #00fff9;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'VT323', monospace;
+        }
+        .echo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            line-height: 1.7;
+            font-style: italic;
+        }
+        /* Contact Section */
+        .contact-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 3rem auto 0;
+        }
+        .contact-description {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .contact-card {
+            background: linear-gradient(135deg, rgba(255, 0, 90, 0.08), rgba(0, 255, 249, 0.04));
+            border: 1.5px solid #333;
+            border-radius: 15px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #cccccc;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .contact-card:hover {
+            border-color: #00fff9;
+            color: #fff;
+            background: #00fff911;
+            box-shadow: 0 4px 32px #00fff933;
+        }
+        .contact-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .contact-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .sound-grid, .visuals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .content-section {
+                padding: 1.2rem 0.5rem 1rem 0.5rem;
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Mobile menu */
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: #ff005a;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="urban-overlay"></div>
+    <div class="scanlines"></div>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo" onclick="showSection('home')">soooshimi</a>
+            <button class="mobile-menu" onclick="toggleMobileMenu()">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" onclick="showSection('home')">home</a></li>
+                <li><a href="#" onclick="showSection('about')">about</a></li>
+                <li><a href="#" onclick="showSection('sound')">Music</a></li>
+                <li><a href="#" onclick="showSection('visuals')">Pics</a></li>
+                <li><a href="#" onclick="showSection('contact')">contact</a></li>
+                <li><a href="#" onclick="showSection('profiles')">links</a></li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="content-section active">
+            <div class="hero">
+                <h1 class="glitch" data-text="soooshimi">soooshimi</h1>
+                <p class="hero-subtitle">Breakcore, and urban exploration, with immersive music.</p>
+                <a href="#" class="play-button" style="margin:2rem auto 0 auto; display:inline-block;" onclick="showSection('profiles'); window.scrollTo({top:document.getElementById('profiles').offsetTop-60,behavior:'smooth'}); return false;">find me</a>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">103k</span>
+                        <span class="stat-label">followers</span>
+
+        </section>
+        <!-- About Section -->
+        <section id="about" class="content-section">
+            <h2 class="section-title">about</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>my name is soph, born jan 5th 2006 in south florida to immigrant parents from romania.</p>
+                    <p>i spent my youth tagging bandos and wandering the swampy wasteland that is soflo. exploring those tropics was the closest fleeting breath of freedom i could touch. i wept 4 the gators trapped in canals and envied the seagulls above. id hold my dads hand while gazing up at airplanes. i swore 2 myself that i would never lose that fascination</p>
+                    <p>to never stop wandering.</p>
+                    <p>i began writing at 13 to cope with months of domestic violence and SA. i still write to heal not only my ache,</p>
+                    <p>but yours too.</p>
+                    <p>i joined the sfl punk scene at 14 and became a regular at their shows. they treated me like a little sister and pushed me to produce aswell. so as a present 4 my 15th birthday, my dad installed a pirated version of logic pro on my laptop. i dropped 'wasps in my stomach' 3 months l8tr.</p>
+                    <p>at 17 i took the 1st opportunity i could snag 2 dip out the swamps and begin the nomadic life ive 4ever ached 4. i drove alone for 8 days across the USA and landed in phx az.</p>
+                    <p>2 years passed. way 2 much 2 cover. i graduated this past april from an audio trade school and took off in a random direction on a hunt 4 audio work while selling hats on the street 4 gas money. now im a travelling stagehand making music out my truck. idk where im headed nxt. lifes wild dude.</p>
+                    <p>b4 i am an artist, i am a nomad. what u r hearing is the electronic soundtrack of a wandering daughter.</p>
+                    <p style="margin-top:2em;">- sooosh&lt;3</p>
+                </div>
+                <div class="about-image">
+                    <img src="images/image.png" alt="Portrait of Soph" style="width:100%; height:auto; border-radius:10px; box-shadow:0 0 24px #000a; display:block;">
+                </div>
+            </div>
+        </section>
+        <!-- Profile Links Section -->
+        <section id="profiles" class="content-section" style="text-align:center; padding-top:1.5rem;">
+            <h2 class="section-title">find me</h2>
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem; margin-bottom:1.5rem;">
+                <a href="https://www.instagram.com/soooshimi/" target="_blank" rel="noopener" class="play-button" style="background:#ff005a; color:#fff; min-width:120px;">Instagram</a>
+                <a href="https://open.spotify.com/artist/2bkQZWnKE8wRrkw0kb4lwq" target="_blank" rel="noopener" class="play-button" style="background:#1db954; color:#fff; min-width:120px;">Spotify</a>
+                <a href="https://linktr.ee/soooshimi?fbclid=PAZXh0bgNhZW0CMTEAAafgjJHbbdyg4YgCiWoJ7_mTxchdAX5OJL9REi_uMmI34Vs6Ppkt-_djByecvQ_aem_O9FoAAId1V57VjJFZaww8g" target="_blank" rel="noopener" class="play-button" style="background:#222; color:#fff; min-width:120px;">Linktree</a>
+            </div>
+        </section>
+        <!-- Sound Section -->
+        <section id="sound" class="content-section">
+            <h2 class="section-title">Top Three Tracks</h2>
+            <div class="sound-grid">
+                <div class="sound-card">
+                    <h3 class="sound-title">Crutch</h3>
+                    <div class="waveform-container">
+                        <div class="wave-bar" style="height: 20px;"></div>
+                        <div class="wave-bar" style="height: 35px;"></div>
+                        <div class="wave-bar" style="height: 15px;"></div>
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 25px;"></div>
+                        <div class="wave-bar" style="height: 30px;"></div>
+                        <div class="wave-bar" style="height: 45px;"></div>
+                        <div class="wave-bar" style="height: 20px;"></div>
+                        <div class="wave-bar" style="height: 35px;"></div>
+                        <div class="wave-bar" style="height: 15px;"></div>
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 25px;"></div>
+                    </div>
+                    <a class="play-button" href="https://open.spotify.com/track/3Lbd84fy9sqrpazDHy0Jfu?si=830eccd2b5004e6d" target="_blank" rel="noopener">listen on spotify</a>
+                </div>
+                <div class="sound-card">
+                    <h3 class="sound-title">Meet Me in Monterey</h3>
+                    <div class="waveform-container">
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 25px;"></div>
+                        <div class="wave-bar" style="height: 45px;"></div>
+                        <div class="wave-bar" style="height: 30px;"></div>
+                        <div class="wave-bar" style="height: 20px;"></div>
+                        <div class="wave-bar" style="height: 35px;"></div>
+                        <div class="wave-bar" style="height: 15px;"></div>
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 25px;"></div>
+                        <div class="wave-bar" style="height: 45px;"></div>
+                        <div class="wave-bar" style="height: 30px;"></div>
+                        <div class="wave-bar" style="height: 20px;"></div>
+                    </div>
+                    <a class="play-button" href="https://open.spotify.com/track/3EQ6nQKAWReZqiin55H2ng?si=2aab9229d29e4652" target="_blank" rel="noopener">listen on spotify</a>
+                </div>
+                <div class="sound-card">
+                    <h3 class="sound-title">Asteria</h3>
+                    <div class="waveform-container">
+                        <div class="wave-bar" style="height: 30px;"></div>
+                        <div class="wave-bar" style="height: 20px;"></div>
+                        <div class="wave-bar" style="height: 35px;"></div>
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 15px;"></div>
+                        <div class="wave-bar" style="height: 45px;"></div>
+                        <div class="wave-bar" style="height: 25px;"></div>
+                        <div class="wave-bar" style="height: 30px;"></div>
+                        <div class="wave-bar" style="height: 20px;"></div>
+                        <div class="wave-bar" style="height: 35px;"></div>
+                        <div class="wave-bar" style="height: 40px;"></div>
+                        <div class="wave-bar" style="height: 15px;"></div>
+                    </div>
+                    <a class="play-button" href="https://open.spotify.com/track/2uD7DWlfZGy3UPdAKXv6oh?si=512adf0f21e2424f" target="_blank" rel="noopener">listen on spotify</a>
+                </div>
+            </div>
+        </section>
+        <!-- Visuals Section -->
+        <section id="visuals" class="content-section">
+            <h2 class="section-title">Pics</h2>
+            <div class="visuals-grid">
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+                <div class="visual-card" style="background:none;">
+                    <div class="visual-overlay" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.3rem;color:#fff;">
+                        coming soon
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Contact Section -->
+        <section id="contact" class="content-section">
+            <h2 class="section-title">contact</h2>
+            <div class="contact-container">
+                <p class="contact-description">For collaborations, commissions, or inquiries, please reach out below.<br>Email: <a href="mailto:fuzzymelman@gmail.com" style="color:#ff005a;">fuzzymelman@gmail.com</a></p>
+                <div class="contact-grid">
+                    <a href="https://instagram.com/soooshimi" class="contact-card">
+                        <span class="contact-icon">📸</span>
+                        <span class="contact-label">instagram</span>
+                    </a>
+                    <a href="mailto:fuzzymelman@gmail.com" class="contact-card">
+                        <span class="contact-icon">✉️</span>
+                        <span class="contact-label">email</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        // Section navigation
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            if(window.innerWidth <= 768) document.getElementById('navLinks').style.display = 'none';
+        }
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        }
+    </script>
+</body>
+</html> 
